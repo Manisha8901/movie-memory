@@ -47,3 +47,5 @@ src/generated/
 .claude/
 .windsurf/
 skills-lock.json
+
+!.env.example
