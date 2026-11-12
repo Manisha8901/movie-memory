@@ -1,74 +1,49 @@
+
 # 🎬 Movie Memory
 
-### Your favorite movie deserves more than a place on a watchlist.
+**A little home for your favorite movie—and a new story about it.**
 
-**Movie Memory** is a full-stack web application where users can sign in with Google, save their all-time favorite movie, and discover interesting facts about it using AI.
+Movie Memory is a full-stack application where users sign in with Google, save their favorite movie, and discover AI-generated facts.
 
-It sounds simple. And that's intentional.
+The focus is on a simple, reliable experience with clear API contracts, responsive editing, secure authentication, and thoughtful error handling.
 
-The challenge was to make the experience feel effortless while handling the parts users shouldn't have to think about: authentication, data security, API errors, optimistic updates, and caching.
-
-**SWE Take-Home Exercise · Variant B — Frontend/API-Focused**
+**SWE Take-Home Exercise | Variant B — Frontend/API-Focused**
 
 ---
 
-## ✨ What can you do?
+## Features
 
-**🔐 Sign in with Google**
+- **Google Authentication:** First-time users complete onboarding, while returning users go directly to their dashboard.
+- **Personal Dashboard:** Displays the user's name, email, profile photo (if available), and favorite movie.
+- **Inline Movie Editing:** Update a favorite movie with Save and Cancel. Failed updates automatically restore the previous value.
+- **AI-Generated Movie Facts:** Generate interesting facts using OpenAI and store them in PostgreSQL.
+- **30-Second Client Cache:** Reuse recent facts when appropriate without unnecessary requests.
 
-No new passwords to remember. First-time users complete a short onboarding step, while returning users go straight to their dashboard.
+## Tech Stack
 
-**🎞️ Save your favorite movie**
-
-Pick that one movie you could watch a hundred times. Your choice is stored in PostgreSQL and linked to your account.
-
-**✏️ Change your mind anytime**
-
-Edit your favorite movie directly from the dashboard. The UI updates immediately, and if the server rejects the change, the previous value is restored.
-
-**✨ Discover movie facts**
-
-Generate an interesting fact about your movie using the OpenAI API. Facts are stored in the database so generated results aren't lost.
-
-**⚡ Keep things responsive**
-
-A lightweight 30-second client-side cache avoids unnecessary fact requests during the same dashboard session. Users don't need to know how it works—it simply happens behind the scenes.
-
-**🛡️ Keep your data yours**
-
-Authenticated routes use the current session to identify the user. One user cannot choose another user's ID to read or update their data.
-
----
-
-## 🧰 Built with
-
-| Layer | Technology |
-|---|---|
+| Area | Technology |
+| --- | --- |
 | Framework | Next.js 16 (App Router) |
 | Language | TypeScript |
-| UI | React 19 + Tailwind CSS |
-| Authentication | Auth.js / NextAuth + Google OAuth |
+| Frontend | React 19, Tailwind CSS |
+| Authentication | Auth.js / NextAuth, Google OAuth |
 | Database | PostgreSQL |
 | ORM | Prisma 7 |
 | AI | OpenAI API |
-| Testing | Vitest + React Testing Library |
-
-I kept the stack focused on the exercise requirements rather than introducing libraries for functionality that could be implemented clearly with React and a small amount of TypeScript.
+| Testing | Vitest, React Testing Library |
 
 ---
 
-## 🚀 Run it locally
+## Getting Started
 
-### Before you begin
-
-You'll need:
+### Prerequisites
 
 - Node.js and npm
-- PostgreSQL
-- Google OAuth credentials from Google Cloud Console
-- An OpenAI API key
+- PostgreSQL or Prisma's local development database
+- Google OAuth credentials
+- OpenAI API key
 
-### 1. Clone the project
+### 1. Clone and install
 
 ```bash
 git clone https://github.com/Manisha8901/movie-memory.git
@@ -76,15 +51,11 @@ cd movie-memory
 npm install
 ```
 
-The `postinstall` script runs `prisma generate` to generate the Prisma client.
+The `postinstall` script generates the Prisma client using `prisma7.config.ts`.
 
-### 2. Set up environment variables
+### 2. Configure environment variables
 
-Copy `.env.example` to a new `.env` file.
-
-```bash
-cp .env.example .env
-```
+Copy `.env.example` to `.env`.
 
 On Windows PowerShell:
 
@@ -92,59 +63,57 @@ On Windows PowerShell:
 Copy-Item .env.example .env
 ```
 
-Fill in the following values:
+Required variables:
 
-| Variable | What it's used for |
-|---|---|
-| `DATABASE_URL` | PostgreSQL connection for application data |
-| `SHADOW_DATABASE_URL` | Separate database used for Prisma development migrations |
+| Variable | Purpose |
+| --- | --- |
+| `DATABASE_URL` | PostgreSQL application database |
+| `SHADOW_DATABASE_URL` | Separate database for development migrations |
 | `AUTH_GOOGLE_ID` | Google OAuth client ID |
 | `AUTH_GOOGLE_SECRET` | Google OAuth client secret |
-| `AUTH_SECRET` | Secret used by Auth.js |
-| `OPENAI_API_KEY` | OpenAI API key for fact generation |
+| `AUTH_SECRET` | Auth.js authentication secret |
+| `OPENAI_API_KEY` | OpenAI API key |
 
-For a conventional local PostgreSQL installation, the connection strings look like:
+Example database URLs:
 
 ```env
 DATABASE_URL="postgresql://USER:PASSWORD@localhost:5432/movie_memory"
 SHADOW_DATABASE_URL="postgresql://USER:PASSWORD@localhost:5432/movie_memory_shadow"
 ```
 
-Create both databases and use your own credentials. The shadow database must be separate from the application database.
+Create both databases and replace the placeholders with your credentials.
 
-**Never commit `.env` or real API credentials.**
+**Never commit `.env` or real API keys.**
 
 ### 3. Configure Google OAuth
 
-In Google Cloud Console, create a web application OAuth client.
+Create a Web Application OAuth client in Google Cloud Console.
 
-For local development, add:
-
-**Authorized JavaScript origin**
+**Authorized JavaScript origin:**
 
 ```text
 http://localhost:3000
 ```
 
-**Authorized redirect URI**
+**Authorized redirect URI:**
 
 ```text
 http://localhost:3000/api/auth/callback/google
 ```
 
-Copy the client ID and client secret into `.env`.
+If the OAuth consent screen is in Testing mode, add your Google account under Test users.
 
-Generate a suitable Auth.js secret using:
+Add the Google client ID and secret to `.env`.
+
+Generate an Auth.js secret using:
 
 ```bash
 npx auth secret
 ```
 
-### 4. Prepare the database
+### 4. Set up the database
 
-Make sure PostgreSQL is running and the database URLs in `.env` are valid.
-
-This project uses `prisma7.config.ts` rather than the default Prisma configuration filename.
+Ensure PostgreSQL is running and the connection URLs are configured.
 
 Apply the existing migrations:
 
@@ -158,290 +127,194 @@ Generate the Prisma client:
 npx prisma generate --config ./prisma7.config.ts
 ```
 
-If you're making new schema changes during development, use:
+To create a new migration during development:
 
 ```bash
 npx prisma migrate dev --config ./prisma7.config.ts --name describe_change
 ```
 
-Alternatively, Prisma's local development database can be started with `npx prisma dev`. Use its displayed connection URLs in `.env`.
+Alternatively, use `npx prisma dev` to start a Prisma-managed local database.
 
-### 5. Start the application
+### 5. Run the application
 
 ```bash
 npm run dev
 ```
 
-Open **http://localhost:3000**.
-
-Sign in with Google, enter your favorite movie, and explore your dashboard.
+Open **http://localhost:3000** and sign in with Google.
 
 ---
 
-## 🧭 How it works
+## Architecture Overview
 
-The main user journey is intentionally short:
-
-**Google Sign-in → First-time Onboarding → Dashboard → Edit Movie / Generate Facts**
-
-Behind that simple flow, responsibilities are divided between the server and the client.
-
-### Architecture at a glance
+Movie Memory uses Next.js App Router with server-rendered pages, authenticated API routes, and interactive React components.
 
 ```text
-                  BROWSER
-                     |
-               Next.js App Router
-                     |
-          +----------+----------+
-          |                     |
-     Server Pages         React Components
-          |                     |
-     Auth.js Session       Typed API Client
-          |                     |
-          +----------+----------+
-                     |
-              API Route Handlers
-                     |
-              +------+------+
-              |             |
-           Prisma       OpenAI API
+Browser / React Dashboard
+           |
+           |-- Auth.js protected pages
+           |
+           |-- Typed API Client
+                    |
+               Next.js API Routes
+                    |
+              +-----+-----+
+              |           |
+            Prisma      OpenAI
               |
-           PostgreSQL
+          PostgreSQL
 ```
 
-### The server handles trust
+### Database Design
 
-Server-rendered pages and API routes are responsible for checking authentication, validating input, calling Prisma, and communicating with OpenAI.
+The Prisma schema contains five models:
 
-The OpenAI API key and database credentials remain on the server.
+| Model | Responsibility |
+| --- | --- |
+| `User` | User profile and favorite movie |
+| `Account` | Google OAuth account association |
+| `Session` | Database-backed authentication sessions |
+| `VerificationToken` | Auth.js adapter support |
+| `MovieFact` | Stored AI-generated facts |
 
-### The client handles interaction
+**Favorite movie:** Stored directly on the `User` model because each user has one favorite movie. A separate movie table would add unnecessary complexity for this scope.
 
-React components manage inline editing, loading indicators, errors, optimistic updates, and short-lived fact caching.
+**Movie facts:** Stored in a separate `MovieFact` model containing the user ID, movie title, generated content, and timestamp. This preserves previously generated facts when users change their favorite movie.
 
-A typed API wrapper in `src/lib/api.ts` provides a consistent interface between the UI and backend endpoints.
+### API Design
 
-This separation keeps the UI responsive without making the browser responsible for authorization or persistence.
+| Method | Endpoint | Description |
+| --- | --- | --- |
+| GET | `/api/me` | Retrieve the authenticated user's profile and favorite movie |
+| PUT | `/api/me/movie` | Validate and update the favorite movie |
+| GET | `/api/fact` | Generate, store, and return a movie fact |
 
----
+The typed API client in `src/lib/api.ts` centralizes requests, response types, and error handling.
 
-## 🗂️ Data modeling decisions
+API routes identify users through their authenticated sessions rather than accepting user IDs from the browser.
 
-The schema contains five models:
-
-| Model | Purpose |
-|---|---|
-| `User` | Stores Google profile fields and the favorite movie |
-| `Account` | Links OAuth provider accounts to users |
-| `Session` | Stores database-backed authentication sessions |
-| `VerificationToken` | Supports the Auth.js adapter schema |
-| `MovieFact` | Stores generated facts associated with users and movies |
-
-### Why store the favorite movie directly on `User`?
-
-The product asks for one favorite movie per user, not a collection of films.
-
-A `favoriteMovie` field on `User` is enough for that requirement. Creating a separate movies table would add complexity without much benefit at this scale.
-
-### Why is `MovieFact` a separate table?
-
-A user can generate many facts over time, including facts for movies they previously selected.
-
-Each `MovieFact` stores:
-
-- The owning user ID
-- The movie title
-- The generated content
-- The creation timestamp
-
-An index on `(userId, movie, createdAt)` supports looking up facts for a particular user and movie.
-
-This keeps the data model small while preserving generated results.
+Movie titles are validated server-side, and database credentials and OpenAI API keys remain on the server.
 
 ---
 
-## 🔌 API design
-
-Variant B emphasizes predictable API behavior, so I implemented three endpoints:
-
-| Endpoint | Method | Responsibility |
-|---|---|---|
-| `/api/me` | GET | Return the signed-in user's profile and saved movie |
-| `/api/me/movie` | PUT | Validate and update the favorite movie |
-| `/api/fact` | GET | Generate, store, and return a movie fact |
-
-The typed client in `src/lib/api.ts` centralizes requests, response types, and error handling.
-
-This means components don't each need to write their own response checks or interpret HTTP errors differently.
-
-### A few correctness decisions
-
-**Authentication first:** Protected endpoints require a valid session.
-
-**No user ID from the browser:** API routes derive the user from their session instead of trusting a user ID supplied in the request.
-
-**Validate on the server:** Movie titles are trimmed and checked against the length rules before saving.
-
-**User-friendly errors:** Invalid input, unauthenticated requests, and upstream failures return meaningful error responses.
-
----
-
-## 💜 Why I chose Variant B
+## Why Variant B?
 
 I chose **Variant B — Frontend/API-Focused** because I wanted to focus on how the frontend communicates with the backend and how to keep the app responsive and reliable for users.
 
 The most challenging part was getting the favorite movie update and the fact cache right together. The UI had to update immediately when the movie was edited, restore the previous value if saving failed, and never show a cached fact for the wrong movie.
 
-I kept the 30-second cache in React-managed memory instead of adding a library like SWR or React Query. That kept the solution simple and made me work through the cache logic myself.
+I kept the 30-second cache in React-managed memory instead of adding SWR or React Query. That kept the solution simple and made me work through the caching logic myself.
 
-Working on these features taught me a lot about React state management, typed API communication, and how small frontend decisions affect correctness and user experience.
+Working on these features helped me understand React state management, typed API communication, and how frontend decisions affect correctness and user experience.
 
 ---
 
-## ⚡ Two features that needed extra thought
+## Key Implementation Decisions
 
-### 1. Optimistic movie editing
+### Optimistic Movie Editing
 
-Nobody wants to click **Save** and stare at an unresponsive interface.
+When a user saves a new favorite movie, the dashboard updates immediately instead of waiting for the API response.
 
-When a user saves a new favorite movie, the UI updates immediately while the request is in progress.
+If the request succeeds, the server-confirmed movie is retained.
 
-If the server succeeds, the confirmed value is kept.
+If the request fails, the previous movie is restored and an error message is displayed.
 
-If the server fails, the previous movie is restored and the user sees an error.
+Cancel discards unsaved changes.
 
-**The challenge:** Keeping the interface fast without showing incorrect information after a failed request.
+### 30-Second Client-Side Caching
 
-### 2. The 30-second fact cache
+The client stores the most recent movie fact alongside its movie title and cache timestamp.
 
-Generating a movie fact involves an external API, so unnecessary requests aren't ideal.
-
-The client stores the most recent fact alongside its movie title and a local timestamp.
-
-When the application performs a normal fact load:
-
-- A valid fact for the same movie can be reused for up to 30 seconds.
-- An expired fact is fetched again when needed.
-- Clicking **Generate New Fact** explicitly bypasses the cache.
+- A matching cached fact can be reused within 30 seconds.
+- Expired facts are fetched again when needed.
+- **Generate New Fact** explicitly bypasses the cache.
 - Changing the favorite movie invalidates the previous fact.
 
-The cache is owned by the dashboard, allowing it to survive a fact-card remount during the same dashboard session.
+The cache is managed at the dashboard level, allowing it to survive fact-card remounts within the same session.
 
-It's deliberately kept in React memory rather than browser storage. A complete page reload clears it, and it isn't shared across tabs.
+It does not survive full browser reloads or synchronize between tabs. This was a deliberate choice to keep the implementation lightweight.
 
-That is a conscious tradeoff: a smaller implementation and no persistent browser copy of another user's fact.
+### Error Handling and Security
+
+- Protected pages redirect unauthenticated users.
+- API endpoints independently validate authentication.
+- Users can access and modify only their own records.
+- Movie titles are trimmed and validated on the server.
+- Missing Google profile names and images have fallback UI.
+- OpenAI errors and rate limits produce user-friendly messages.
+- Failed fact refreshes can preserve the previously displayed fact.
 
 ---
 
-## 🧪 Testing: making sure the happy path isn't the only path
+## Testing
 
-A successful demo is nice. Knowing what happens when things fail is more important.
+The project includes **25 automated tests** covering:
 
-The project includes **25 automated tests across five test files**, covering:
+- Movie title validation
+- API client responses and error handling
+- Optimistic editing and rollback
+- Cache expiration and invalidation
+- Fact generation loading and error states
+- Cached fact reuse after component remounting
 
-| Area | What is tested |
-|---|---|
-| Movie validation | Input rules and edge cases |
-| API client | Successful responses and normalized errors |
-| Cache helper | 30-second expiration and movie matching |
-| Inline editing | Optimistic updates and rollback |
-| Fact card | Loading, refresh, error handling, invalidation, and cache reuse after remount |
-
-### Run the checks
+Run the tests:
 
 ```bash
 npm test
+```
+
+TypeScript validation:
+
+```bash
 npx tsc --noEmit
+```
+
+Linting:
+
+```bash
 npm run lint
+```
+
+Production build:
+
+```bash
 npm run build
 ```
 
-The fact-generation component tests use mocked API responses, so they don't consume OpenAI credits.
+Fact generation tests use mocked API responses instead of making real OpenAI requests.
 
-At the time of the final local verification, all **25 tests passed**, TypeScript checking passed, and the production build succeeded.
-
----
-
-## 🛡️ Security and failure handling
-
-The application includes several guardrails:
-
-- Protected dashboard pages redirect unauthenticated users.
-- API routes verify sessions independently of the UI.
-- User records are selected from the authenticated identity.
-- Movie titles are validated server-side.
-- Secrets stay in environment variables and server-side code.
-- Missing Google profile names and photos have fallback UI.
-- OpenAI errors and rate limits are presented as user-friendly messages.
-- A previous fact can remain visible if generating a fresh one fails.
-
-The goal is not to claim production-grade security from a small take-home exercise, but to make the fundamental trust boundaries correct.
+All 25 automated tests and the production build passed during local verification.
 
 ---
 
-## ⚖️ Tradeoffs I made
+## Tradeoffs
 
-| Decision | Why | Limitation |
-|---|---|---|
-| React-memory cache | Simple, explicit, no extra dependency | Doesn't survive full page reloads |
-| Favorite movie stored on `User` | Fits the one-movie requirement | Less flexible for a future watchlist |
-| Optimistic updates | Makes editing feel immediate | Requires rollback handling |
-| Generate facts on demand | Keeps the experience interactive | Depends on OpenAI availability and rate limits |
-| Small, focused test suite | Covers important behaviors within the exercise's scope | Doesn't replace complete integration testing |
+| Decision | Benefit | Limitation |
+| --- | --- | --- |
+| React-memory caching | Simple and dependency-free | Resets after full page reloads |
+| Favorite movie stored on `User` | Fits the current requirements | A watchlist would need a richer model |
+| Optimistic UI updates | Immediate feedback | Requires rollback handling |
+| `GET /api/fact` generates and saves data | Follows the suggested API contract | `POST` would better represent this side effect |
+| OpenAI fact generation | Dynamic, movie-specific content | Subject to API latency and rate limits |
 
-I deliberately avoided adding features just to make the project look bigger. The focus was on making the core functionality understandable and reliable.
+## What I'd Improve With Two More Hours
 
----
-
-## ⏳ If I had two more hours...
-
-I'd spend the time strengthening what already exists rather than adding an unrelated feature.
-
-**1. More authorization integration tests**
-
-Verify cross-user data isolation using separate authenticated sessions, not only component-level mocks.
-
-**2. Better request coordination**
-
-Improve fact request deduplication across page remounts and potentially across tabs, while keeping users' cached data isolated.
-
-**3. Automated CI checks**
-
-Run TypeScript, linting, tests, and the production build automatically for every GitHub push.
-
-**4. Accessibility improvements**
-
-Review keyboard navigation, focus management, form feedback, and screen-reader announcements.
-
-**5. Better observability**
-
-Add structured server-side logs for debugging failed database operations and external API requests.
+1. Add integration tests for authorization and cross-user data isolation.
+2. Improve request deduplication across multiple tabs.
+3. Add GitHub Actions for automated testing and builds.
+4. Improve accessibility and keyboard navigation.
+5. Add structured server-side error logging.
 
 ---
 
-## 🤖 How I used AI
+## AI Usage
 
-AI tools were allowed for this exercise, and I used them as development assistance.
-
-- Explored implementation approaches for Next.js, Auth.js, Prisma, and React.
-- Helped draft and refine API routes, components, and automated tests.
-- Assisted with debugging TypeScript errors, React rendering behavior, and test failures.
-- Helped review caching decisions, error handling, security considerations, and documentation.
-- Verified the application locally through testing and manual browser checks.
-
-I can explain the key implementation choices, tradeoffs, and failure cases in the code.
+- Used AI assistance to explore implementation approaches and help refine code.
+- Used AI during debugging and test development.
+- Reviewed and verified the implementation through local testing, a production build, and a fresh-clone installation check.
 
 ---
-
-## 🎬 Final thoughts
-
-Movie Memory is a small application, but it brings together several real-world engineering concerns: identity, persistence, external APIs, typed contracts, and UI state.
-
-My biggest takeaway was that a feature isn't finished just because it works when everything goes right. The interesting engineering work often comes from deciding what should happen when a save fails, a request repeats, a cache becomes stale, or a user signs out.
-
-**Built with Next.js, React, TypeScript, PostgreSQL, Prisma, Google OAuth, and OpenAI.**
 
 **Repository:** https://github.com/Manisha8901/movie-memory
 
-**Selected extension:** Variant B — Frontend/API-Focused
+**Chosen Extension:** Variant B — Frontend/API-Focused
