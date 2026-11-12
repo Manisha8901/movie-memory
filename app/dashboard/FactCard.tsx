@@ -1,6 +1,8 @@
 
 "use client";
-
+// The dashboard owns this ref so cached facts survive FactCard remounts.
+// Cache writes happen inside an event/effect callback, not during rendering.
+/* eslint-disable react-hooks/immutability */
 import {
   useCallback,
   useEffect,
@@ -104,9 +106,11 @@ export default function FactCard({
   );
 
   // Load on mount, using the cache if one is valid.
-  useEffect(() => {
-    void loadFact(false);
-  }, [loadFact]);
+useEffect(() => {
+  // Initial fact loading is an intentional side effect.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  void loadFact(false);
+}, [loadFact]);
 
   return (
     <section className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
